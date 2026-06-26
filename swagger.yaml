@@ -1,0 +1,629 @@
+openapi: 3.0.3
+info:
+  title: Автосервис API
+  description: REST API для управления автосервисом
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+security:
+  - basicAuth: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /api/v1/audit:
+    get:
+      tags: [Audit]
+      summary: Получить все записи аудита
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список записей аудита
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /api/v1/audit/table/{tableName}:
+    get:
+      tags: [Audit]
+      summary: Получить записи аудита по таблице
+      security:
+        - basicAuth: []
+      parameters:
+        - name: tableName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Записи аудита для таблицы
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /api/v1/audit/user/{email}:
+    get:
+      tags: [Audit]
+      summary: Получить записи аудита по пользователю
+      security:
+        - basicAuth: []
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Записи аудита пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /api/v1/audit/period:
+    get:
+      tags: [Audit]
+      summary: Получить записи аудита за период
+      security:
+        - basicAuth: []
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Записи аудита за период
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /api/v1/exceptions:
+    get:
+      tags: [Exceptions]
+      summary: Получить все исключения
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список исключений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemExceptionsLog'
+
+  /api/v1/exceptions/unhandled:
+    get:
+      tags: [Exceptions]
+      summary: Получить необработанные исключения
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список необработанных исключений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemExceptionsLog'
+
+  /api/v1/exceptions/{id}/handle:
+    patch:
+      tags: [Exceptions]
+      summary: Отметить исключение как обработанное
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Исключение отмечено как обработанное
+
+  /api/v1/cars:
+    get:
+      tags: [Cars]
+      summary: Получить все автомобили
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список автомобилей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+    post:
+      tags: [Cars]
+      summary: Добавить автомобиль
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+      responses:
+        '200':
+          description: Автомобиль создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+
+  /api/v1/cars/my:
+    get:
+      tags: [Cars]
+      summary: Получить мои автомобили
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список автомобилей клиента
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+
+  /api/v1/cars/vin/{vin}:
+    get:
+      tags: [Cars]
+      summary: Получить автомобиль по VIN
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Автомобиль найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+
+  /api/v1/cars/{id}:
+    put:
+      tags: [Cars]
+      summary: Обновить автомобиль
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+      responses:
+        '200':
+          description: Автомобиль обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+    delete:
+      tags: [Cars]
+      summary: Удалить автомобиль
+      security:
+        - basicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Автомобиль удален
+
+  /api/v1/orders:
+    get:
+      tags: [Orders]
+      summary: Получить все заказы
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceOrder'
+    post:
+      tags: [Orders]
+      summary: Создать заказ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrder'
+      responses:
+        '200':
+          description: Заказ создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+
+  /api/v1/orders/my:
+    get:
+      tags: [Orders]
+      summary: Получить мои заказы
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Список заказов клиента
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceOrder'
+
+  /api/v1/orders/car/{vin}:
+    get:
+      tags: [Orders]
+      summary: Получить заказы по VIN автомобиля
+      parameters:
+        - name: vin
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Заказы по автомобилю
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceOrder'
+
+  /api/v1/orders/{id}/status:
+    patch:
+      tags: [Orders]
+      summary: Обновить статус заказа
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [scheduled, in_progress, completed, cancelled]
+      responses:
+        '200':
+          description: Статус обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      summary: Получить категории услуг
+      responses:
+        '200':
+          description: Список категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceCategory'
+
+  /api/v1/reports/cars:
+    get:
+      tags: [Reports]
+      summary: Отчет по автомобилям
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Отчет по автомобилям
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/reports/services/popularity:
+    get:
+      tags: [Reports]
+      summary: Отчет по популярности услуг
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Отчет по популярности
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/reports/services/time:
+    get:
+      tags: [Reports]
+      summary: Отчет по времени выполнения услуг
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Отчет по времени услуг
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/batch/cars/csv:
+    post:
+      tags: [Batch]
+      summary: Импорт автомобилей из CSV
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Результат импорта
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successCount:
+                    type: integer
+                  errorCount:
+                    type: integer
+
+  /api/v1/batch/cars/json:
+    post:
+      tags: [Batch]
+      summary: Импорт автомобилей из JSON
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Результат импорта
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successCount:
+                    type: integer
+                  errorCount:
+                    type: integer
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Car:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vin:
+          type: string
+          maxLength: 17
+        brand:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          minimum: 1950
+        engineType:
+          type: string
+          enum: [gasoline, diesel, hybrid, electric]
+        engineVolume:
+          type: number
+          format: decimal
+        enginePowerHp:
+          type: integer
+        transmissionType:
+          type: string
+          enum: [manual, automatic, cvt, dual_clutch]
+        driveType:
+          type: string
+          enum: [FWD, RWD, AWD]
+        fuelType:
+          type: string
+          enum: [AI_92, AI_95, AI_98, diesel, electric]
+        bodyType:
+          type: string
+        mileage:
+          type: integer
+          minimum: 0
+        color:
+          type: string
+
+    ServiceOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        carId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, cancelled]
+        scheduledAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+        plannedEnd:
+          type: string
+          format: date-time
+        actualEnd:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    ServiceCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        authorization:
+          type: string
+        role:
+          type: string
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableName:
+          type: string
+        operation:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        oldData:
+          type: string
+        newData:
+          type: string
+
+    SystemExceptionsLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        source:
+          type: string
+        operation:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        handled:
+          type: boolean

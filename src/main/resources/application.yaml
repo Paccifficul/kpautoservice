@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: kpautoservice
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/kpautoservice}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:secret}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${FORMAT_SQL:true}
